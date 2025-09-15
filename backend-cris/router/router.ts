@@ -4,41 +4,40 @@ import { seeder } from "../prisma/seeder.mjs";
 
 import bcrypt from 'bcrypt';
 import express from 'express';
-import { verifyToken } from "../jwt/verifyToken.mjs";
+// import { verifyToken } from "../jwt/verifyToken.mjs";
 
 export const router = express.Router();
 const prisma = new PrismaClient();
 
 
-
 // -----------------------------------------------------------------------------
 // LOGIN
-router.post('/handleLogin', async (req, res) => {
-  const { usuario, senha } = req.body;
+// router.post('/handleLogin', async (req, res) => {
+//   const { usuario, senha } = req.body;
 
-  try {
-    const user = await prisma.user.findUnique({ where: { nome: usuario } });
+//   try {
+//     const user = await prisma.user.findUnique({ where: { nome: usuario } });
 
-    if (!user) {
-      return res.status(404).json({ errorMessage: "Usuário não encontrado." });
-    }
+//     if (!user) {
+//       return res.status(404).json({ errorMessage: "Usuário não encontrado." });
+//     }
 
-    const senhaVerify = await bcrypt.compare(senha, user.senha);
-    if (!senhaVerify) {
-      return res.status(404).json({ errorMessage: "Credenciais inválidas." });
-    }
+//     const senhaVerify = await bcrypt.compare(senha, user.senha);
+//     if (!senhaVerify) {
+//       return res.status(404).json({ errorMessage: "Credenciais inválidas." });
+//     }
 
-    const token = setToken(user.nome);
-    return res.status(200).json({ token });
+//     const token = setToken(user.nome);
+//     return res.status(200).json({ token });
 
-  } catch (error) {
-    return res.status(500).json({ errorMessage: "Erro ao fazer login. " + error });
-  }
-});
+//   } catch (error) {
+//     return res.status(500).json({ errorMessage: "Erro ao fazer login. " + error });
+//   }
+// });
 
-router.post('/verify', verifyToken, (req, res) => {
-  return res.status(200).json({ message: req.decoded });
-});
+// router.post('/verify', verifyToken, (req, res) => {
+//   return res.status(200).json({ message: req.decoded });
+// });
 
 // -----------------------------------------------------------------------------
 // GET ALL POSTS
@@ -66,13 +65,12 @@ router.get('/getAllPosts', async (req, res) => {
 
 // -----------------------------------------------------------------------------
 // ADD POST
-router.post('/addPost', verifyToken, async (req, res) => {
+router.post('/addPost', async (req, res) => {
   const { descricao, data, hora } = req.body;
 
   if (!descricao || !data || !hora) {
     return res.status(400).json({ errorMessage: "Valores precisam ser inseridos." });
   }
-
 
   try {
     await prisma.event.create({
@@ -87,7 +85,7 @@ router.post('/addPost', verifyToken, async (req, res) => {
 
 // -----------------------------------------------------------------------------
 // DELETE POST
-router.delete('/deletePost/:postId', verifyToken, async (req, res) => {
+router.delete('/deletePost/:postId', async (req, res) => {
   const postId = Number(req.params.postId);
 
   if (!postId) {
@@ -110,9 +108,9 @@ router.delete('/deletePost/:postId', verifyToken, async (req, res) => {
 
 // -----------------------------------------------------------------------------
 // UPDATE POST
-router.post('/updatePost/:postId', verifyToken, async (req, res) => {
+router.post('/updatePost/:postId', async (req, res) => {
   const postId = Number(req.params.postId);
-  
+
   const { descricao, data, hora } = req.body;
 
   if (!descricao || !data || !hora || !postId) {
@@ -141,14 +139,17 @@ router.post('/updatePost/:postId', verifyToken, async (req, res) => {
 // -----------------------------------------------------------------------------
 // GET POST FROM DATE
 router.get('/getPostFromDate/:dateValue', async (req, res) => {
-  const dateValue = req.params.dateValue;
+  const dateValue: string = req.params.dateValue;
 
   if (!dateValue) {
     return res.status(400).json({ errorMessage: "Valores precisam ser inseridos." });
   }
 
+  const parsedData = dateValue.replaceAll('-', '/')
+  // console.log(parsedData)
+
   try {
-    const events = await prisma.event.findMany({ where: { data: dateValue } });
+    const events = await prisma.event.findMany({ where: { data: parsedData } });
 
     if (!events.length) {
       return res.status(400).json({ errorMessage: "Data não encontrada no sistema." });
