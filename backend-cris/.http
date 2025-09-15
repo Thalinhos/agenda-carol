@@ -1,0 +1,59 @@
+### SEEDER
+GET https://agenda-show-cris.onrender.com/seeder HTTP/1.1
+
+### GET TOKEN - LOGIN IN
+POST https://agenda-show-cris.onrender.com/handleLogin HTTP/1.1
+content-type: application/json
+
+{
+    "usuario": "admin",
+    "senha": "crisdj"
+}
+
+### VALIDATE TOKEN
+POST https://agenda-show-cris.onrender.com/verify HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzM1MjM4OTcyLCJleHAiOjE3MzUyMzk4NzJ9.Vsh7mpC9D5N9kDlZ7jYlLkwNIb_3Abk7ncTUl3-nasY
+
+
+
+### RETRIEVE ALL POSTS
+GET https://agenda-show-cris.onrender.com/getAllPosts HTTP/1.1
+content-type: application/json
+
+### RETRIEVE A SINGLE POST FROM A DATA DD/MM/YYYY
+GET http://localhost:3000/getPostFromDate/16-12-2024 HTTP/1.1
+content-type: application/json
+############ WORKING HERE
+
+
+### ADD A NEW POST
+POST https://agenda-show-cris.onrender.com/addPost HTTP/1.1
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzM1MjM5MjcxLCJleHAiOjE3MzUyNDAxNzF9.JH09p3sfsFJFpiGGeNM9siA8JN77D0V3OBL7aVSNH_M
+
+{
+    "descricao": "teste do dia de hoje!",
+    "data": "01/11/2024",
+    "hora": "13hrs"
+}
+
+### DELETE A POST BY ID
+DELETE https://agenda-show-cris.onrender.com/deletePost/67695e3e024898cc1a33bbc3 HTTP/1.1
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzM1MjM5MjcxLCJleHAiOjE3MzUyNDAxNzF9.JH09p3sfsFJFpiGGeNM9siA8JN77D0V3OBL7aVSNH_M
+
+
+### UPDATE A POST BY ADD PASSING A NEW BODY
+POST https://agenda-show-cris.onrender.com/updatePost/676d992e2f0aed5ad8ce627b  HTTP/1.1
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzM1MjM4OTcyLCJleHAiOjE3MzUyMzk4NzJ9.Vsh7mpC9D5N9kDlZ7jYlLkwNIb_3Abk7ncTUl3-nasY
+
+
+{
+  "descricao": "teste do dia de hoje, mudado a dada do dia 1 para o dia 3!",
+      "data": "03/01/2025",
+      "hora": "14hrs"
+}
+
+
