@@ -1,4 +1,5 @@
 import { PrismaClient } from '../generated/prisma/client.js';
+import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library.js';
 import { setToken } from "../jwt/setToken.mjs";
 import { seeder } from "../prisma/seeder.mjs";
 
@@ -79,6 +80,13 @@ router.post('/addPost', async (req, res) => {
     return res.status(200).json({ message: "Evento inserido com sucesso!" });
 
   } catch (error) {
+    
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return res.status(400).json({ errorMessage: "Descrição já existe! Altere para outra." });
+      }
+    }
+
     return res.status(400).json({ errorMessage: "Erro ao inserir valores. Erro: " + error });
   }
 });
@@ -161,6 +169,36 @@ router.get('/getPostFromDate/:dateValue', async (req, res) => {
     return res.status(500).json({ errorMessage: "Erro ao consultar posts." });
   }
 });
+
+//edit css color by date
+router.post('/editColor/:dateValue', async (req, res) => {
+  const { color } = req.body
+  const dateValue: string = req.params.dateValue;
+  
+  if(!color){
+    return res.status(400).json({ errorMessage: "Nenhuma cor selecionada" })
+  }
+  
+  const parsedData = dateValue.replaceAll('-', '/')
+
+  try {
+    const events = await prisma.event.findMany({ where: { data: parsedData } });
+
+    if (!events.length) {
+      return res.status(400).json({ errorMessage: "Data não encontrada no sistema." });
+    }
+
+    await prisma.event.updateMany({
+      where: { data: parsedData },
+      data: { css_bg_color: color, updatedAt: new Date() }
+    });
+
+    return res.status(200).json();
+
+  } catch (error) {
+    return res.status(500).json({ errorMessage: "Erro ao consultar posts." });
+  }
+})
 
 // -----------------------------------------------------------------------------
 // SEEDER
