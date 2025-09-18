@@ -73,6 +73,17 @@ router.post('/addPost', async (req, res) => {
     return res.status(400).json({ errorMessage: "Valores precisam ser inseridos." });
   }
 
+  const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+  if (!dateRegex.test(data)) {
+    return res.status(400).json({ errorMessage: "Data deve estar no formato DD/MM/AAAA." });
+  }
+
+  const hourRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+  if (!hourRegex.test(hora)) {
+    return res.status(400).json({ errorMessage: "Hora deve estar no formato HH:MM (24h)." });
+  }
+
+
   try {
     await prisma.event.create({
       data: { descricao, data, hora, createdAt: new Date(), updatedAt: new Date() }
@@ -125,6 +136,16 @@ router.post('/updatePost/:postId', async (req, res) => {
     return res.status(400).json({ errorMessage: "Valores precisam ser inseridos." });
   }
 
+  const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+  if (!dateRegex.test(data)) {
+    return res.status(400).json({ errorMessage: "Data deve estar no formato DD/MM/AAAA." });
+  }
+
+  const hourRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+  if (!hourRegex.test(hora)) {
+    return res.status(400).json({ errorMessage: "Hora deve estar no formato HH:MM (24h)." });
+  }
+
 
   try {
     const exists = await prisma.event.findUnique({ where: { id: postId } });
@@ -147,14 +168,13 @@ router.post('/updatePost/:postId', async (req, res) => {
 // -----------------------------------------------------------------------------
 // GET POST FROM DATE
 router.get('/getPostFromDate/:dateValue', async (req, res) => {
-  const dateValue: string = req.params.dateValue;
+  const dateValue = req.params.dateValue;
 
   if (!dateValue) {
     return res.status(400).json({ errorMessage: "Valores precisam ser inseridos." });
   }
 
   const parsedData = dateValue.replaceAll('-', '/')
-  // console.log(parsedData)
 
   try {
     const events = await prisma.event.findMany({ where: { data: parsedData } });
@@ -173,7 +193,7 @@ router.get('/getPostFromDate/:dateValue', async (req, res) => {
 //edit css color by date
 router.post('/editColor/:dateValue', async (req, res) => {
   const { color } = req.body
-  const dateValue: string = req.params.dateValue;
+  const dateValue = req.params.dateValue;
   
   if(!color){
     return res.status(400).json({ errorMessage: "Nenhuma cor selecionada" })
@@ -202,11 +222,11 @@ router.post('/editColor/:dateValue', async (req, res) => {
 
 // -----------------------------------------------------------------------------
 // SEEDER
-router.get('/seeder', async (req, res) => {
-  try {
-    await seeder();
-    return res.status(200).json({ message: "Seeder atualizado com sucesso!" });
-  } catch (error) {
-    return res.status(404).json({ errorMessage: `Falha ao fazer seeder. ${error}.` });
-  }
-});
+// router.get('/seeder', async (req, res) => {
+//   try {
+//     await seeder();
+//     return res.status(200).json({ message: "Seeder atualizado com sucesso!" });
+//   } catch (error) {
+//     return res.status(404).json({ errorMessage: `Falha ao fazer seeder. ${error}.` });
+//   }
+// });

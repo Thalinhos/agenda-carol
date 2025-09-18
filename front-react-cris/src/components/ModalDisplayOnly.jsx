@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
-import { ChromePicker } from "react-color"; // <-- Color picker
+import { ChromePicker } from "react-color";
 import { mainUrl } from "../url";
 
 export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, refreshCalendar }) {
@@ -10,18 +10,15 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
 
   const dataToPost = dataToShow.replaceAll("/", "-");
   const [dataFromDB, setDataFromDB] = useState([]);
-  const [errorMessage, setErrorMessage] = useState();
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Estados para criar/editar
   const [editingEvent, setEditingEvent] = useState(null);
   const [formData, setFormData] = useState({ descricao: "", data: dataToShow, hora: "" });
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Estado para a cor da data
   const [selectedColor, setSelectedColor] = useState("");
   const [showColorPicker, setShowColorPicker] = useState(false);
 
-  // Buscar eventos dessa data
   useEffect(() => {
     if (!render) return;
     (async () => {
@@ -33,7 +30,6 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
           setDataFromDB(data.message);
         } else {
           setDataFromDB([]);
-          setErrorMessage(data.errorMessage);
         }
       } catch (error) {
         setErrorMessage("Erro ao buscar dados");
@@ -41,13 +37,11 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
     })();
   }, [dataToPost, render]);
 
-  // Atualizar formulário
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Adicionar novo evento
   const handleAdd = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -63,18 +57,17 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
       const data = await response.json();
       if (response.ok) {
         setDataFromDB([...dataFromDB, formData]);
-        resetForm();
+        resetForm(); 
+        setErrorMessage("");
       } else {
-        setErrorMessage(data.errorMessage);
+        setErrorMessage(data.errorMessage || "Erro ao adicionar evento.");
       }
     } catch (error) {
-      setErrorMessage("Erro ao adicionar evento.", error);
+      setErrorMessage("Erro ao adicionar evento.");
     }
     refreshCalendar();
-    setErrorMessage('');
   };
 
-  // Editar evento
   const handleEdit = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -93,18 +86,16 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
           prev.map((ev) => (ev.id === editingEvent.id ? { ...ev, ...formData } : ev))
         );
         resetForm();
+        setErrorMessage("");
       } else {
-        setErrorMessage(data.errorMessage);
+        setErrorMessage(data.errorMessage || "Erro ao editar evento.");
       }
     } catch (error) {
       setErrorMessage("Erro ao editar evento.");
     }
     refreshCalendar();
-    setErrorMessage('');
-
   };
 
-  // Deletar evento
   const handleDelete = async (id) => {
     if (!confirm("Tem certeza que deseja excluir este evento?")) return;
 
@@ -129,7 +120,6 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
     refreshCalendar();
   };
 
-  // Atualizar cor da data
   const handleUpdateColor = async () => {
     if (!selectedColor) return alert("Selecione uma cor primeiro");
 
@@ -154,17 +144,15 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
       alert("Erro ao atualizar a cor.");
     }
     refreshCalendar();
-    setShowColorPicker(false)
+    setShowColorPicker(false);
   };
 
-  // Resetar formulário
   const resetForm = () => {
     setFormData({ descricao: "", data: dataToShow, hora: "" });
     setEditingEvent(null);
     setShowAddForm(false);
   };
 
-  // Renderizar eventos
   const displayDataInModal = () => {
     if (dataFromDB.length === 0) {
       return <p>Sem dados para exibir.</p>;
@@ -206,9 +194,7 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
       <Modal.Body>
         {displayDataInModal()}
 
-        {/* Botão de adicionar evento */}
         <Button
-          className=""
           variant={showAddForm ? "secondary" : "success"}
           onClick={() => {
             setShowAddForm((prev) => !prev);
@@ -219,7 +205,6 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
           {showAddForm ? "Cancelar" : "Adicionar Novo Evento"}
         </Button>
 
-        {/* Formulário de adição/edição */}
         {(showAddForm || editingEvent) && (
           <Form className="mt-3">
             <Form.Group className="mb-3">
@@ -236,12 +221,15 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
             <Form.Group className="mb-3">
               <Form.Label>Hora</Form.Label>
               <Form.Control
-                type="time"
+                type="text"
                 name="hora"
+                placeholder="HH:MM"
                 value={formData.hora}
                 onChange={handleChange}
               />
             </Form.Group>
+
+             {errorMessage && <p className="text-danger">{errorMessage}</p>}
 
             {editingEvent ? (
               <div className="d-flex gap-2">
@@ -260,7 +248,6 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
           </Form>
         )}
 
-        {/* Toggle color picker dentro do body */}
         {showColorPicker && (
           <div className="mt-3">
             <p><strong>Escolher cor de fundo para a data:</strong></p>
@@ -273,11 +260,8 @@ export function ModalDisplayOnly({ render = false, dataToShow = "", closeModal, 
             </Button>
           </div>
         )}
-
-        {errorMessage && <p className="text-danger mt-2">{errorMessage}</p>}
       </Modal.Body>
 
-      {/* Footer com os dois botões: Trocar cor (esquerda) e Fechar (direita) */}
       <Modal.Footer className="d-flex justify-content-between">
         {dataFromDB.length > 0 && (
           <Button
